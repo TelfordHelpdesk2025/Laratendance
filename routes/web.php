@@ -16,9 +16,10 @@ require __DIR__ . '/general.php';
 Route::get("/attendance-index", [AttendanceListController::class, 'index'])->name('attendance.index');
 
 Route::post('/store', [AttendanceListController::class, 'store'])->name('attendance.store');
-Route::post('/update/{id}', [AttendanceListController::class, 'update'])->name('attendance.update');
+Route::put('/update/{id}', [AttendanceListController::class, 'update'])->name('attendance.update');
 Route::delete('/attendance/{id}', [AttendanceListController::class, 'destroy'])->name('attendance.destroy');
 
 Route::fallback(function () {
-    return Inertia::render('404');
+    // For Inertia requests, just redirect back to the same URL
+    return redirect()->to(request()->fullUrl());
 })->name('404');

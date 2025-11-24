@@ -1,6 +1,12 @@
 import Dropdown from "@/Components/sidebar/Dropdown";
 import SidebarLink from "@/Components/sidebar/SidebarLink";
 import { usePage, router } from "@inertiajs/react";
+import dayjs from "dayjs";
+import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
+import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
+
+dayjs.extend(isSameOrAfter);
+dayjs.extend(isSameOrBefore);
 
 export default function NavLinks() {
     const { emp_data } = usePage().props;
@@ -20,6 +26,39 @@ export default function NavLinks() {
         if (hour < 18) return "Good afternoon";
         return "Good evening";
     };
+
+    // ========================
+    // Determine Event / Holiday
+    // ========================
+    const getHoliday = () => {
+        const today = dayjs();
+        const year = today.year();
+        const events = {
+            christmas: [dayjs(`${year}-11-03`), dayjs(`${year}-12-30`)],
+            newyear: [dayjs(`${year}-12-31`), dayjs(`${year + 1}-01-02`)],
+            valentine: [dayjs(`${year}-02-10`), dayjs(`${year}-02-14`)],
+            halloween: [dayjs(`${year}-10-25`), dayjs(`${year}-10-31`)],
+        };
+        for (const [key, [start, end]] of Object.entries(events)) {
+            if (today.isSameOrAfter(start) && today.isSameOrBefore(end)) return key;
+        }
+        return null;
+    };
+
+    const holiday = getHoliday();
+
+    // ========================
+    // Logout Button Gradient Based on Event
+    // ========================
+    const logoutButtonClass = {
+        christmas: "bg-gradient-to-r from-red-600 via-green-600 to-red-700",
+        newyear: "bg-gradient-to-r from-yellow-400 via-pink-500 to-blue-500",
+        valentine: "bg-gradient-to-r from-red-500 via-pink-500 to-pink-300",
+        halloween: "bg-gradient-to-r from-orange-700 via-black to-gray-900",
+        default: "bg-red-600",
+    };
+
+    const buttonClass = logoutButtonClass[holiday] || logoutButtonClass.default;
 
     return (
         <nav
@@ -57,7 +96,7 @@ export default function NavLinks() {
 
                 <button
                     onClick={logout}
-                    className="mt-2 w-full flex items-center justify-start gap-2 px-3 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+                    className={`mt-2 w-full flex items-center justify-start gap-2 px-3 py-2 text-white rounded-md hover:opacity-90 transition ${buttonClass}`}
                 >
                     <i className="fa-regular fa-share-from-square"></i>
                     Log out

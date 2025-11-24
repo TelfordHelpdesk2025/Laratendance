@@ -24,7 +24,7 @@ class AttendanceListController extends Controller
     {
         $result = $this->datatable->handle(
             $request,
-            'mysql',
+            'authify',
             'attendance',
             [
                 'conditions' => function ($query) {
@@ -129,7 +129,7 @@ class AttendanceListController extends Controller
 
         $validated = $this->calculateBStatus($validated);
 
-        $id = DB::connection('mysql')->table('attendance')->insertGetId($validated);
+        $id = DB::connection('authify')->table('attendance')->insertGetId($validated);
 
         return back()->with([
             'success' => 'Attendance logged successfully',
@@ -155,7 +155,7 @@ class AttendanceListController extends Controller
         // Auto calculate bstatus1 & bstatus2
         $validated = $this->calculateBStatus($validated);
 
-        DB::connection('mysql')->table('attendance')
+        DB::connection('authify')->table('attendance')
             ->where('id', $id)
             ->update($validated);
 
@@ -164,7 +164,7 @@ class AttendanceListController extends Controller
 
     public function destroy($id)
     {
-        $deleted = DB::table('attendance')->where('id', $id)->delete();
+        $deleted = DB::connection('authify')->table('attendance')->where('id', $id)->delete();
 
         if ($deleted) {
             return back()->with('success', 'Attendance deleted successfully.');

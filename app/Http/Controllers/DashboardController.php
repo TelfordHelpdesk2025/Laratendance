@@ -16,26 +16,26 @@ class DashboardController extends Controller
         $empName = session('emp_data')['emp_name'] ?? null;
 
         // Total Attendance Entries
-        $totalAttendance = DB::table('attendance')
+        $totalAttendance = DB::connection('authify')->table('attendance')
             ->where('emp_id', $emp_id)
             ->count();
 
         // Total Check-ins today
         $today = Carbon::now()->format('Y-m-d');
-        $todayAttendance = DB::table('attendance')
+        $todayAttendance = DB::connection('authify')->table('attendance')
             ->where('emp_id', $emp_id)
             ->whereDate('date', $today)
             ->count();
 
         // Total 1st Breaks Today
-        $total1stBreak = DB::table('attendance')
+        $total1stBreak = DB::connection('authify')->table('attendance')
             ->where('emp_id', $emp_id)
             ->whereNotNull('bout1')
             ->whereDate('date', $today)
             ->count();
 
         // Latest 5 attendance records
-        $latestAttendance = DB::table('attendance')
+        $latestAttendance = DB::connection('authify')->table('attendance')
             ->where('emp_id', $emp_id)
             ->orderByDesc('date')
             ->limit(5)
