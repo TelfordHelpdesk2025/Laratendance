@@ -157,6 +157,8 @@ const eventGradients = {
   halloween: "bg-gradient-to-r from-orange-700 via-black to-gray-900",
 };
 
+const modalBg = holiday ? eventGradients[holiday] : "bg-white dark:bg-gray-800";
+const modalTextColor = holiday ? "text-white" : "text-gray-900 dark:text-gray-100";
 const themeGradient = holiday ? eventGradients[holiday] : "bg-gradient-to-r from-blue-500 via-green-500 to-yellow-400";
 
 
@@ -376,18 +378,20 @@ const deleteAttendance = (id) => {
       )}
     </h3>
 
-            <div className="flex items-center justify-between mb-4">
-                <h1 className="text-2xl font-bold text-gray-100">
-                    <i className="fa-regular fa-calendar-check"></i> Attendance List
-                </h1>
-                <button
-                    className="btn btn-sm px-3 py-2 bg-green-600 text-white rounded-md"
-                    onClick={() => setShowAddModal(true)}
-                >
-                    <i className="fa-solid fa-plus"></i>
-                    Add Logtime
-                </button>
-            </div>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2">
+  <h1 className="text-2xl font-bold text-gray-100 flex items-center gap-2">
+    <i className="fa-regular fa-calendar-check"></i> Attendance List
+  </h1>
+
+  <button
+    className="btn btn-sm px-3 py-2 bg-green-600 text-white rounded-md w-full sm:w-auto flex items-center justify-center gap-2"
+    onClick={() => setShowAddModal(true)}
+  >
+    <i className="fa-solid fa-plus"></i>
+    Add Logtime
+  </button>
+</div>
+
           <div className="bg-gray-100 rounded-md">
             <DataTable
                 columns={[
@@ -418,25 +422,25 @@ const deleteAttendance = (id) => {
 
 
             {/* Add Modal */}
-            <Modal show={showAddModal} onClose={() => setShowAddModal(false)}>
-  <div className="p-6 space-y-4">
-    <h2 className="text-xl font-bold mb-4">
+<Modal show={showAddModal} onClose={() => setShowAddModal(false)}>
+  <div className={`${modalBg} p-6 space-y-4 rounded-xl shadow-xl`}>
+    <h2 className={`text-xl font-bold mb-4 flex items-center gap-2 ${modalTextColor}`}>
       <i className="fa-regular fa-calendar-check"></i> Add Biometric
     </h2>
 
     <div className="space-y-2">
-      <label><i className="fa-regular fa-calendar mr-1"></i>Date</label>
+      <label className={modalTextColor}><i className="fa-regular fa-calendar mr-1"></i>Date</label>
       <input
         type="date"
         className="input input-bordered w-full"
         value={selectedDate}
-        max={new Date().toISOString().split("T")[0]} // optional, prevent future date
+        max={new Date().toISOString().split("T")[0]}
         onChange={(e) => setSelectedDate(e.target.value)}
       />
     </div>
 
     <div className="space-y-2">
-      <label><i className="fa-regular fa-calendar-check mr-1"></i>Check In (CIN)</label>
+      <label className={modalTextColor}><i className="fa-regular fa-calendar-check mr-1"></i>Check In (CIN)</label>
       <input
         type="time"
         className="input input-bordered w-full"
@@ -445,94 +449,80 @@ const deleteAttendance = (id) => {
       />
     </div>
 
-     <div className="mt-6 w-full flex justify-end">
-        <button
-      className="btn btn-sm px-3 py-2 bg-green-600 text-white rounded-md"
-      onClick={addBiometricRow}
-    >
-      <i className="fa-solid fa-plus"></i>
-      Submit
-    </button>
+    <div className="mt-6 w-full flex justify-end">
+      <button
+        className="btn btn-sm px-3 py-2 bg-green-600 text-white rounded-md"
+        onClick={addBiometricRow}
+      >
+        <i className="fa-solid fa-plus"></i> Submit
+      </button>
     </div>
   </div>
 </Modal>
 
 
+
             {/* Edit Modal */}
-            {editingRow && (
-                <Modal
-                    show={showEditModal}
-                    onClose={() => {
-                        setShowEditModal(false);
-                        setEditingRow(null);
-                    }}
-                >
-                    <div className="p-6 space-y-4">
-                        <h2 className="text-xl font-bold mb-4">
-                            <i className="fa-regular fa-calendar-check mr-1"></i>
-                            {editingRow.cin ? "Edit Attendance" : "Add Attendance"}
-                        </h2>
+           {editingRow && (
+  <Modal show={showEditModal} onClose={() => { setShowEditModal(false); setEditingRow(null); }}>
+    <div className={`${modalBg} p-6 space-y-4 rounded-xl shadow-xl`}>
+      <h2 className={`text-xl font-bold mb-4 flex items-center gap-2 ${modalTextColor}`}>
+        <i className="fa-regular fa-calendar-check mr-1"></i>
+        {editingRow.cin ? "Edit Attendance" : "Add Attendance"}
+      </h2>
 
-                        {/* Select column to edit */}
-                        <div className="space-y-2">
-                            <label> <i className="fa-solid fa-pen"></i>Choose Column to Edit</label>
-                            <select
-                                className="select select-bordered w-full"
-                                value={editingRow.selectedField || ""}
-                                onChange={(e) =>
-                                    setEditingRow({ ...editingRow, selectedField: e.target.value })
-                                }
-                            >
-                                <option value="">-- Select --</option>
-                                <option value="cin">Check In</option>
-                                <option value="bout1">1st Break Out</option>
-                                <option value="bin1">1st Break In</option>
-                                <option value="bout2">2nd Break Out</option>
-                                <option value="bin2">2nd Break In</option>
-                                <option value="cout">Check Out</option>
-                            </select>
-                        </div>
+      {/* Column select and input fields */}
+      <div className="space-y-2">
+        <label className={modalTextColor}><i className="fa-solid fa-pen"></i>Choose Column to Edit</label>
+        <select
+          className="select select-bordered w-full"
+          value={editingRow.selectedField || ""}
+          onChange={(e) => setEditingRow({ ...editingRow, selectedField: e.target.value })}
+        >
+          <option value="">-- Select --</option>
+          <option value="cin">Check In</option>
+          <option value="bout1">1st Break Out</option>
+          <option value="bin1">1st Break In</option>
+          <option value="bout2">2nd Break Out</option>
+          <option value="bin2">2nd Break In</option>
+          <option value="cout">Check Out</option>
+        </select>
+      </div>
 
-                        {/* Input for chosen column */}
-                        {editingRow.selectedField && (
-                            <div className="space-y-2">
-                                <label>
-                                    {editingRow.selectedField === "cin" && "Check In"}
-                                    {editingRow.selectedField === "cout" && "Check Out"}
-                                    {editingRow.selectedField === "bout1" && "1st Break Out"}
-                                    {editingRow.selectedField === "bin1" && "1st Break In"}
-                                    {editingRow.selectedField === "bout2" && "2nd Break Out"}
-                                    {editingRow.selectedField === "bin2" && "2nd Break In"}
-                                </label>
-                                <input
-                                    type="time"
-                                    step="60"
-                                    className="input input-bordered w-full"
-                                    value={editingRow[editingRow.selectedField] || ""}
-                                    onChange={(e) =>
-                                        setEditingRow({
-                                            ...editingRow,
-                                            [editingRow.selectedField]: e.target.value,
-                                        })
-                                    }
-                                />
-                            </div>
-                        )}
+      {editingRow.selectedField && (
+        <div className="space-y-2">
+          <label className={modalTextColor}>
+            {editingRow.selectedField === "cin" && "Check In"}
+            {editingRow.selectedField === "cout" && "Check Out"}
+            {editingRow.selectedField === "bout1" && "1st Break Out"}
+            {editingRow.selectedField === "bin1" && "1st Break In"}
+            {editingRow.selectedField === "bout2" && "2nd Break Out"}
+            {editingRow.selectedField === "bin2" && "2nd Break In"}
+          </label>
+          <input
+            type="time"
+            step="60"
+            className="input input-bordered w-full"
+            value={editingRow[editingRow.selectedField] || ""}
+            onChange={(e) =>
+              setEditingRow({ ...editingRow, [editingRow.selectedField]: e.target.value })
+            }
+          />
+        </div>
+      )}
 
-                        <div className="mt-6 w-full flex justify-end">
+      <div className="mt-6 w-full flex justify-end">
+        <button
+          className="btn btn-sm px-3 py-2 bg-green-600 text-white rounded-md"
+          onClick={updateRow}
+        >
+          <i className="fa-solid fa-floppy-disk"></i> Save
+        </button>
+      </div>
+    </div>
+  </Modal>
+)}
 
-                       
-                            <button
-                                className="btn btn-sm px-3 py-2 bg-green-600 text-white rounded-md"
-                                onClick={updateRow}
-                            >
-                                <i className="fa-solid fa-floppy-disk"></i>
-                                Save
-                            </button>
-                        </div>
-                    </div>
-                </Modal>
-            )}
 
             {/* View Modal */}
 {showViewModal && selectedRow && (

@@ -3,10 +3,162 @@ import { Head, router, usePage } from "@inertiajs/react";
 import DataTable from "@/Components/DataTable";
 import Modal from "@/Components/Modal";
 import { useEffect, useState } from "react";
+import dayjs from "dayjs";
+import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
+import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 
 export default function AttendanceList({ tableData, tableFilters }) {
     const { emp_data } = usePage().props;
     const [rows, setRows] = useState(tableData.data || []);
+
+    dayjs.extend(isSameOrAfter);
+dayjs.extend(isSameOrBefore);
+
+const getHoliday = () => {
+  const today = dayjs();
+  const year = today.year();
+  const events = {
+    christmas: [dayjs(`${year}-11-03`), dayjs(`${year}-12-30`)],
+    newyear: [dayjs(`${year}-12-31`), dayjs(`${year+1}-01-02`)],
+    valentine: [dayjs(`${year}-02-10`), dayjs(`${year}-02-14`)],
+    halloween: [dayjs(`${year}-10-25`), dayjs(`${year}-10-31`)],
+  };
+  for (const [key, [start, end]] of Object.entries(events)) {
+    if (today.isSameOrAfter(start) && today.isSameOrBefore(end)) return key;
+  }
+  return null;
+};
+
+// ==============================
+// Holiday Animations
+// ==============================
+const Snowfall = () => {
+  const snowflakes = Array.from({ length: 50 });
+  return (
+    <div className="absolute inset-0 pointer-events-none z-0">
+      {snowflakes.map((_, i) => (
+        <div
+          key={i}
+          className="absolute bg-white rounded-full opacity-75"
+          style={{
+            width: `${Math.random() * 6 + 2}px`,
+            height: `${Math.random() * 6 + 2}px`,
+            left: `${Math.random() * 100}%`,
+            top: `${Math.random() * -100}%`,
+            animation: `fall ${5 + Math.random() * 5}s linear infinite`,
+          }}
+        />
+      ))}
+      <style>{`
+        @keyframes fall {
+          0% { transform: translateY(0); }
+          100% { transform: translateY(110vh); }
+        }
+      `}</style>
+    </div>
+  );
+};
+
+const Valentines = () => {
+  const hearts = Array.from({ length: 40 });
+  return (
+    <div className="absolute inset-0 pointer-events-none z-0">
+      {hearts.map((_, i) => (
+        <div
+          key={i}
+          className="absolute bg-pink-500 rounded-full opacity-80"
+          style={{
+            width: `${Math.random() * 8 + 4}px`,
+            height: `${Math.random() * 8 + 4}px`,
+            left: `${Math.random() * 100}%`,
+            top: `${Math.random() * -100}%`,
+            animation: `fall ${3 + Math.random() * 3}s linear infinite`,
+          }}
+        />
+      ))}
+      <style>{`
+        @keyframes fall {
+          0% { transform: translateY(0) rotate(0deg); }
+          100% { transform: translateY(110vh) rotate(360deg); }
+        }
+      `}</style>
+    </div>
+  );
+};
+
+const Halloween = () => {
+  const bats = Array.from({ length: 20 });
+  return (
+    <div className="absolute inset-0 pointer-events-none z-0">
+      {bats.map((_, i) => (
+        <div
+          key={i}
+          className="absolute bg-black w-4 h-2 rounded-full"
+          style={{
+            left: `${Math.random() * 100}%`,
+            top: `${Math.random() * 50}%`,
+            animation: `fly ${5 + Math.random() * 5}s linear infinite alternate`,
+          }}
+        />
+      ))}
+      <style>{`
+        @keyframes fly {
+          0% { transform: translate(0,0) rotate(0deg); }
+          100% { transform: translate(${Math.random()*50-25}px, ${Math.random()*50-25}px) rotate(360deg); }
+        }
+      `}</style>
+    </div>
+  );
+};
+
+const Fireworks = () => {
+  const sparks = Array.from({ length: 20 });
+  return (
+    <div className="absolute inset-0 pointer-events-none z-0">
+      {sparks.map((_, i) => (
+        <div
+          key={i}
+          className="absolute rounded-full opacity-75"
+          style={{
+            width: `${Math.random() * 8 + 2}px`,
+            height: `${Math.random() * 8 + 2}px`,
+            backgroundColor: `hsl(${Math.random() * 360},100%,60%)`,
+            left: `${Math.random() * 100}%`,
+            top: `${Math.random() * 50}%`,
+            animation: `firework ${1 + Math.random() * 1.5}s ease-out infinite`,
+          }}
+        />
+      ))}
+      <style>{`
+        @keyframes firework {
+          0% { transform: scale(0) translateY(0); opacity: 1; }
+          50% { transform: scale(1) translateY(-50px); opacity: 1; }
+          100% { transform: scale(0) translateY(-100px); opacity: 0; }
+        }
+      `}</style>
+    </div>
+  );
+};
+
+const holiday = getHoliday();
+
+// Greeting text
+  const greetings = {
+    christmas: "Merry Christmas",
+    newyear: "Happy New Year",
+    valentine: "Happy Valentines",
+    halloween: "Happy Halloween",
+  };
+
+const eventGradients = {
+  christmas: "bg-gradient-to-r from-red-600 via-green-600 to-yellow-400",
+  newyear: "bg-gradient-to-r from-yellow-400 via-white to-yellow-200",
+  valentine: "bg-gradient-to-r from-red-500 via-pink-500 to-pink-300",
+  halloween: "bg-gradient-to-r from-orange-700 via-black to-gray-900",
+};
+
+const themeGradient = holiday ? eventGradients[holiday] : "bg-gradient-to-r from-blue-500 via-green-500 to-yellow-400";
+
 
     // Modal states
     const [showAddModal, setShowAddModal] = useState(false);
@@ -200,19 +352,45 @@ const deleteAttendance = (id) => {
         <AuthenticatedLayout>
             <Head title="Attendance" />
 
-            <div className="flex items-center justify-between mb-4">
-                <h1 className="text-2xl font-bold">
-                    <i className="fa-regular fa-calendar-check"></i> Attendance List
-                </h1>
-                <button
-                    className="btn btn-sm px-3 py-2 bg-green-600 text-white rounded-md"
-                    onClick={() => setShowAddModal(true)}
-                >
-                    <i className="fa-solid fa-plus"></i>
-                    Add Logtime
-                </button>
-            </div>
+            <div className={`min-h-screen relative p-6 rounded-md ${themeGradient}`}>
+  {/* Animated layer */}
+  {holiday === "christmas" && <Snowfall />}
+  {holiday === "newyear" && <Fireworks />}
+  {holiday === "valentine" && <Valentines />}
+  {holiday === "halloween" && <Halloween />}
 
+  {/* Page content */}
+  <div className="relative z-10">
+    {/* Header with greeting */}
+    <h3 className="text-2xl font-semibold mb-6 text-white flex items-center gap-2">
+      {holiday 
+        ? `${greetings[holiday]}` 
+        : ""}
+      {holiday && (
+        <span>
+          {holiday === "christmas" && "🎄"}
+          {holiday === "newyear" && "🎆"}
+          {holiday === "valentine" && "💖"}
+          {holiday === "halloween" && "🎃"}
+        </span>
+      )}
+    </h3>
+
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2">
+  <h1 className="text-2xl font-bold text-gray-100 flex items-center gap-2">
+    <i className="fa-regular fa-calendar-check"></i> Attendance List
+  </h1>
+
+  <button
+    className="btn btn-sm px-3 py-2 bg-green-600 text-white rounded-md w-full sm:w-auto flex items-center justify-center gap-2"
+    onClick={() => setShowAddModal(true)}
+  >
+    <i className="fa-solid fa-plus"></i>
+    Add Logtime
+  </button>
+</div>
+
+          <div className="bg-gray-100 rounded-md">
             <DataTable
                 columns={[
                     { key: "date", label: "Date" },
@@ -237,6 +415,9 @@ const deleteAttendance = (id) => {
                 rowKey={(row) => row.id || row.tempKey}
                 showExport={false}
             />
+          </div>
+            
+
 
             {/* Add Modal */}
             <Modal show={showAddModal} onClose={() => setShowAddModal(false)}>
@@ -432,6 +613,9 @@ const deleteAttendance = (id) => {
     </div>
   </div>
 )}
+  </div>
+  </div>
         </AuthenticatedLayout>
     );
+    
 }
