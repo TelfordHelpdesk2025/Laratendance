@@ -33,7 +33,7 @@ export default function NavBar() {
                             >
                                <i className="fa-regular fa-circle-user text-2xl"></i>
                                 <span className="mt-[3px]">
-                                    Hello, {getGreeting()}, {emp_data?.emp_firstname}
+                                    Hello {getGreeting()}, {emp_data?.emp_firstname}
                                 </span>
                                 <i className="fa-solid fa-caret-down text-2xl"></i>
                             </div>

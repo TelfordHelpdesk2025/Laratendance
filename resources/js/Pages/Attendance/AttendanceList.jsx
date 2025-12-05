@@ -256,7 +256,7 @@ const themeGradient = holiday ? eventGradients[holiday] : "bg-gradient-to-r from
         setShowEditModal(true);
     };
 
-    const updateRow = () => {
+const updateRow = () => {
     if (!editingRow || !editingRow.id) {
         return showAIMessage("⚠️ Missing row ID. Please reload and try again.");
     }
@@ -270,11 +270,10 @@ const themeGradient = holiday ? eventGradients[holiday] : "bg-gradient-to-r from
             );
 
             setEditingRow(null);
-            setShowEditModal(false);
 
-            showAIMessage("✅ Attendance record updated successfully.", () => {
-               setTimeout(() => window.location.reload(), 500);
-
+            alert("✅ Attendance record updated successfully.", () => {
+               
+           setTimeout(() => window.location.reload(), 500);
             });
         },
         onError: () => {
@@ -282,6 +281,7 @@ const themeGradient = holiday ? eventGradients[holiday] : "bg-gradient-to-r from
         },
     });
 };
+
 
 
     // ======================

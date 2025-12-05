@@ -155,12 +155,28 @@ class AttendanceListController extends Controller
         // Auto calculate bstatus1 & bstatus2
         $validated = $this->calculateBStatus($validated);
 
+        // ✅ Calculate no_hours if cin & cout are set
+        if (!empty($validated['cin']) && !empty($validated['cout'])) {
+            try {
+                $cin = new \DateTime($validated['cin']);
+                $cout = new \DateTime($validated['cout']);
+                $interval = $cin->diff($cout);
+                // total hours as decimal (hours + minutes/60)
+                $validated['no_hours'] = $interval->h + ($interval->i / 60);
+            } catch (\Exception $e) {
+                $validated['no_hours'] = null; // fallback
+            }
+        } else {
+            $validated['no_hours'] = null;
+        }
+
         DB::connection('authify')->table('attendance')
             ->where('id', $id)
             ->update($validated);
 
         return redirect()->back()->with('success', 'Attendance updated successfully');
     }
+
 
     public function destroy($id)
     {

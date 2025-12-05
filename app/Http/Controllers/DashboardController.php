@@ -12,7 +12,6 @@ class DashboardController extends Controller
     public function index(Request $request)
     {
         $emp_id = session('emp_data')['emp_id'] ?? null;
-
         $empName = session('emp_data')['emp_name'] ?? null;
 
         // Total Attendance Entries
@@ -34,12 +33,48 @@ class DashboardController extends Controller
             ->whereDate('date', $today)
             ->count();
 
-        // Latest 5 attendance records
+        // Latest 5 attendance records (WITH no_hours computed & SAVED)
         $latestAttendance = DB::connection('authify')->table('attendance')
             ->where('emp_id', $emp_id)
             ->orderByDesc('date')
-            ->limit(5)
-            ->get();
+            ->get()
+            ->map(function ($row) {
+
+                $cinRaw  = trim($row->cin ?? "");
+                $coutRaw = trim($row->cout ?? "");
+                $date    = $row->date; // IMPORTANT – we use this!
+
+                if ($cinRaw !== "" && $coutRaw !== "" && !empty($date)) {
+
+                    try {
+                        // Combine DATE + TIME para hindi error
+                        $cin  = Carbon::parse("$date $cinRaw");
+                        $cout = Carbon::parse("$date $coutRaw");
+
+                        // Overnight fix (ex: 18:51 → 07:00 next day)
+                        if ($cout->lessThan($cin)) {
+                            $cout->addDay();
+                        }
+
+                        $hours = $cin->floatDiffInHours($cout);
+                        $computedHours = round($hours, 2);
+
+                        // Save back to DB
+                        DB::connection('authify')->table('attendance')
+                            ->where('id', $row->id)
+                            ->update(['no_hours' => $computedHours]);
+
+                        $row->no_hours = $computedHours;
+                    } catch (\Exception $e) {
+                        $row->no_hours = null;
+                    }
+                } else {
+                    $row->no_hours = null;
+                }
+
+                return $row;
+            });
+
 
         return Inertia::render('Dashboard', [
             'empName' => $empName,
